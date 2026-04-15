@@ -34,6 +34,7 @@
             <th>Prénom</th>
             <th>Mail</th>
             <th>Rôle</th>
+            <th>Type</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -56,6 +57,12 @@
               <?php else: ?>
                 <span class="badge badge-verified">User</span>
               <?php endif; ?>
+            </td>
+            <td>
+              <?php
+              $types = ['societe'=>'Société','createur'=>'Créateur','user'=>'Utilisateur','admin'=>'Admin'];
+              echo htmlspecialchars($types[$u['type_compte'] ?? 'user'] ?? 'Utilisateur');
+              ?>
             </td>
             <td>
               <div class="table-actions">

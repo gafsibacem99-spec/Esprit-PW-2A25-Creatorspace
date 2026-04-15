@@ -27,38 +27,12 @@ function checkLogged(): void {
 // ── VALIDATION — PHP pure, zéro HTML5 ────────────────────────
 
 function valider(array $data, UserModel $model, int $excludeId = 0): array {
-    $errors   = [];
-    $nom      = trim($data['nom']      ?? '');
-    $prenom   = trim($data['prenom']   ?? '');
-    $mail     = trim($data['mail']     ?? '');
-    $password = trim($data['password'] ?? '');
-
-    if ($nom === '')      $errors['nom']      = "Ce champ est obligatoire.";
-    if ($prenom === '')   $errors['prenom']   = "Ce champ est obligatoire.";
-    if ($mail === '')     $errors['mail']     = "Ce champ est obligatoire.";
-    if ($password === '') $errors['password'] = "Ce champ est obligatoire.";
-
-    if (empty($errors['nom']) && !preg_match('/^[a-zA-ZÀ-ÿ\s\-]+$/u', $nom))
-        $errors['nom'] = "Le nom ne doit contenir que des lettres.";
-
-    if (empty($errors['prenom']) && !preg_match('/^[a-zA-ZÀ-ÿ\s\-]+$/u', $prenom))
-        $errors['prenom'] = "Le prénom ne doit contenir que des lettres.";
-
-    if (empty($errors['mail']) && !str_ends_with($mail, '@gmail.com'))
-        $errors['mail'] = "L'email doit se terminer par @gmail.com.";
-
-    if (empty($errors['mail']) && $model->mailExiste($mail, $excludeId))
-        $errors['mail'] = "Cet email est déjà utilisé.";
-
-    return $errors;
-}
-
-// Validation profil — password optionnel
-function validerProfil(array $data, UserModel $model, int $userId): array {
-    $errors = [];
-    $nom    = trim($data['nom']    ?? '');
-    $prenom = trim($data['prenom'] ?? '');
-    $mail   = trim($data['mail']   ?? '');
+    $errors  = [];
+    $nom     = trim($data['nom']         ?? '');
+    $prenom  = trim($data['prenom']      ?? '');
+    $mail    = trim($data['mail']        ?? '');
+    $password= trim($data['password']    ?? '');
+    $type    = trim($data['type_compte'] ?? '');
 
     if ($nom === '')
         $errors['nom'] = "Ce champ est obligatoire.";
@@ -74,8 +48,46 @@ function validerProfil(array $data, UserModel $model, int $userId): array {
         $errors['mail'] = "Ce champ est obligatoire.";
     elseif (!str_ends_with($mail, '@gmail.com'))
         $errors['mail'] = "L'email doit se terminer par @gmail.com.";
-    elseif ($model->mailExiste($mail, $userId))
+    elseif (empty($errors['mail']) && $model->mailExiste($mail, $excludeId))
         $errors['mail'] = "Cet email est déjà utilisé.";
+
+    if ($password === '')
+        $errors['password'] = "Ce champ est obligatoire.";
+
+    $typesValides = ['user', 'societe', 'createur'];
+    if (!in_array($type, $typesValides))
+        $errors['type_compte'] = "Veuillez choisir un type de compte valide.";
+
+    return $errors;
+}
+
+function validerProfil(array $data, UserModel $model, int $userId): array {
+    $errors = [];
+    $nom    = trim($data['nom']         ?? '');
+    $prenom = trim($data['prenom']      ?? '');
+    $mail   = trim($data['mail']        ?? '');
+    $type   = trim($data['type_compte'] ?? '');
+
+    if ($nom === '')
+        $errors['nom'] = "Ce champ est obligatoire.";
+    elseif (!preg_match('/^[a-zA-ZÀ-ÿ\s\-]+$/u', $nom))
+        $errors['nom'] = "Le nom ne doit contenir que des lettres.";
+
+    if ($prenom === '')
+        $errors['prenom'] = "Ce champ est obligatoire.";
+    elseif (!preg_match('/^[a-zA-ZÀ-ÿ\s\-]+$/u', $prenom))
+        $errors['prenom'] = "Le prénom ne doit contenir que des lettres.";
+
+    if ($mail === '')
+        $errors['mail'] = "Ce champ est obligatoire.";
+    elseif (!str_ends_with($mail, '@gmail.com'))
+        $errors['mail'] = "L'email doit se terminer par @gmail.com.";
+    elseif (empty($errors['mail']) && $model->mailExiste($mail, $userId))
+        $errors['mail'] = "Cet email est déjà utilisé.";
+
+    $typesValides = ['user', 'societe', 'createur'];
+    if (!in_array($type, $typesValides))
+        $errors['type_compte'] = "Veuillez choisir un type de compte valide.";
 
     return $errors;
 }
@@ -116,6 +128,9 @@ switch ($action) {
             'admins'    => $model->countByRole('admin'),
             'users'     => $model->countByRole('user'),
             'new_month' => $model->countNewThisMonth(),
+            'societes'  => $model->countByType('societe'),
+            'createurs' => $model->countByType('createur'),
+            'normaux'   => $model->countByType('user'),
         ];
         $lastUsers   = $model->getLastFive();
         $page        = 'dashboard';

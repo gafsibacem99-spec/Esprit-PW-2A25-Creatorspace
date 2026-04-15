@@ -50,22 +50,20 @@ switch ($action) {
 
     // ── REGISTER ──────────────────────────────────────────────
     case 'register':
-        // Redirige si déjà connecté
         if (isset($_SESSION['user_id'])) {
             header('Location: index.php?ctrl=user&action=profile');
             exit;
         }
-
         $errors = [];
         $old    = [];
-
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $nom      = trim($_POST['nom']      ?? '');
-            $prenom   = trim($_POST['prenom']   ?? '');
-            $mail     = trim($_POST['mail']     ?? '');
-            $password = trim($_POST['password'] ?? '');
+            $nom      = trim($_POST['nom']         ?? '');
+            $prenom   = trim($_POST['prenom']      ?? '');
+            $mail     = trim($_POST['mail']        ?? '');
+            $password = trim($_POST['password']    ?? '');
+            $type     = trim($_POST['type_compte'] ?? '');
 
-            // Validation PHP PURE — SANS HTML5
+            // Validation PHP PURE — ZÉRO HTML5
             if ($nom === '')
                 $errors['nom'] = "Ce champ est obligatoire.";
             elseif (!preg_match('/^[a-zA-ZÀ-ÿ\s\-]+$/u', $nom))
@@ -86,22 +84,24 @@ switch ($action) {
             if ($password === '')
                 $errors['password'] = "Ce champ est obligatoire.";
 
+            $typesValides = ['user', 'societe', 'createur'];
+            if (!in_array($type, $typesValides))
+                $errors['type_compte'] = "Veuillez choisir un type de compte.";
+
             if (empty($errors)) {
                 $model->insert([
-                    'nom'      => $nom,
-                    'prenom'   => $prenom,
-                    'mail'     => $mail,
-                    'password' => $password,
-                    'role'     => 'user',   // rôle forcé
+                    'nom'         => $nom,
+                    'prenom'      => $prenom,
+                    'mail'        => $mail,
+                    'password'    => $password,
+                    'type_compte' => $type,
                 ]);
                 $_SESSION['success_register'] = "Compte créé avec succès ! Connectez-vous.";
                 header('Location: index.php?ctrl=auth&action=login');
                 exit;
             }
-
             $old = $_POST;
         }
-
         require_once __DIR__ . '/../view/auth/register.php';
         break;
 

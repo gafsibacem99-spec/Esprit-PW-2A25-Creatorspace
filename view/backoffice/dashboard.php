@@ -12,8 +12,8 @@
     </div>
   </div>
 
-  <!-- 4 STAT CARDS -->
-  <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-bottom:32px;">
+  <!-- 4 STAT CARDS — ligne 1 -->
+  <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-bottom:1rem;">
 
     <div style="background:rgba(255,255,255,0.05); border:1px solid rgba(108,63,197,0.3);
                 border-radius:16px; padding:1.5rem; text-align:center;">
@@ -49,6 +49,35 @@
 
   </div>
 
+  <!-- STAT CARDS — ligne 2 : par type de compte -->
+  <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-bottom:32px;">
+
+    <div style="background:rgba(255,255,255,0.05); border:1px solid rgba(14,116,144,0.4);
+                border-radius:16px; padding:1.5rem; text-align:center;">
+      <div style="font-size:2.5rem; font-weight:700; color:#0e7490; font-family:'Syne',sans-serif;">
+        <?= $stats['createurs'] ?>
+      </div>
+      <div style="font-size:0.9rem; color:#94a3b8; margin-top:0.5rem;">🎨 Créateurs de contenu</div>
+    </div>
+
+    <div style="background:rgba(255,255,255,0.05); border:1px solid rgba(124,58,237,0.4);
+                border-radius:16px; padding:1.5rem; text-align:center;">
+      <div style="font-size:2.5rem; font-weight:700; color:#7c3aed; font-family:'Syne',sans-serif;">
+        <?= $stats['societes'] ?>
+      </div>
+      <div style="font-size:0.9rem; color:#94a3b8; margin-top:0.5rem;">🏢 Sociétés</div>
+    </div>
+
+    <div style="background:rgba(255,255,255,0.05); border:1px solid rgba(16,185,129,0.4);
+                border-radius:16px; padding:1.5rem; text-align:center;">
+      <div style="font-size:2.5rem; font-weight:700; color:#10b981; font-family:'Syne',sans-serif;">
+        <?= $stats['normaux'] ?>
+      </div>
+      <div style="font-size:0.9rem; color:#94a3b8; margin-top:0.5rem;">👤 Utilisateurs normaux</div>
+    </div>
+
+  </div>
+
   <!-- QUICK ACTIONS -->
   <div style="background:rgba(255,255,255,0.04); border:1px solid var(--border);
               border-radius:var(--radius); padding:24px; margin-bottom:28px;">
@@ -76,17 +105,27 @@
             <th>Prénom</th>
             <th>Email</th>
             <th>Rôle</th>
+            <th>Type</th>
           </tr>
         </thead>
         <tbody>
           <?php if (empty($lastUsers)): ?>
           <tr>
-            <td colspan="4" style="text-align:center; color:var(--text3); padding:20px;">
+            <td colspan="5" style="text-align:center; color:var(--text3); padding:20px;">
               Aucun utilisateur.
             </td>
           </tr>
           <?php else: ?>
+          <?php
+          $labels = [
+              'societe'  => ['label' => 'Société',             'color' => '#7c3aed'],
+              'createur' => ['label' => 'Créateur de contenu', 'color' => '#0e7490'],
+              'user'     => ['label' => 'Utilisateur',         'color' => '#10b981'],
+              'admin'    => ['label' => 'Admin',               'color' => '#dc2626'],
+          ];
+          ?>
           <?php foreach ($lastUsers as $u): ?>
+          <?php $t = $labels[$u['type_compte'] ?? 'user'] ?? $labels['user']; ?>
           <tr>
             <td style="font-weight:600; color:var(--text);"><?= htmlspecialchars($u['nom']) ?></td>
             <td style="color:var(--text2);"><?= htmlspecialchars($u['prenom']) ?></td>
@@ -97,6 +136,13 @@
               <?php else: ?>
                 <span class="badge badge-verified">User</span>
               <?php endif; ?>
+            </td>
+            <td>
+              <span style="background:rgba(255,255,255,0.08); color:<?= $t['color'] ?>;
+                           border:1px solid <?= $t['color'] ?>40;
+                           border-radius:20px; padding:3px 10px; font-size:0.75rem; font-weight:600;">
+                <?= htmlspecialchars($t['label']) ?>
+              </span>
             </td>
           </tr>
           <?php endforeach; ?>

@@ -83,6 +83,22 @@
           <?php endif; ?>
         </div>
 
+        <div class="form-group">
+          <label>Type de compte</label>
+          <!-- select — NO required, NO HTML5 -->
+          <select name="type_compte">
+            <option value="" disabled <?= empty($old['type_compte']) ? 'selected' : '' ?>>-- Choisissez votre type --</option>
+            <option value="user"     <?= ($old['type_compte'] ?? '') === 'user'     ? 'selected' : '' ?>>Utilisateur normal</option>
+            <option value="societe"  <?= ($old['type_compte'] ?? '') === 'societe'  ? 'selected' : '' ?>>Société</option>
+            <option value="createur" <?= ($old['type_compte'] ?? '') === 'createur' ? 'selected' : '' ?>>Créateur de contenu</option>
+          </select>
+          <?php if (!empty($errors['type_compte'])): ?>
+            <span style="color:var(--danger); font-size:0.8rem; margin-top:4px; display:block;">
+              <?= htmlspecialchars($errors['type_compte']) ?>
+            </span>
+          <?php endif; ?>
+        </div>
+
         <button type="submit" class="btn btn-primary w-full" style="margin-top:8px;">
           S'inscrire →
         </button>

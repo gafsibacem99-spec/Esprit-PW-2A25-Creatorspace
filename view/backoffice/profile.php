@@ -105,6 +105,24 @@
           <?php endif; ?>
         </div>
 
+        <div style="margin-bottom:20px;">
+          <label style="display:block; color:var(--text2); font-size:0.85rem; margin-bottom:8px;">Type de compte</label>
+          <!-- select — NO required, NO HTML5 -->
+          <select name="type_compte"
+                  style="width:100%; background:rgba(255,255,255,0.08);
+                         border:1px solid rgba(108,63,197,0.5); color:var(--text);
+                         border-radius:8px; padding:12px 14px; font-size:0.95rem; outline:none;">
+            <option value="user"     <?= ($item['type_compte'] ?? 'user') === 'user'     ? 'selected' : '' ?>>Utilisateur normal</option>
+            <option value="societe"  <?= ($item['type_compte'] ?? '')     === 'societe'  ? 'selected' : '' ?>>Société</option>
+            <option value="createur" <?= ($item['type_compte'] ?? '')     === 'createur' ? 'selected' : '' ?>>Créateur de contenu</option>
+          </select>
+          <?php if (!empty($errors['type_compte'])): ?>
+            <span style="color:#ff6b6b; font-size:0.8rem; margin-top:4px; display:block;">
+              <?= htmlspecialchars($errors['type_compte']) ?>
+            </span>
+          <?php endif; ?>
+        </div>
+
         <div style="margin-bottom:28px;">
           <label style="display:block; color:var(--text2); font-size:0.85rem; margin-bottom:8px;">
             Nouveau mot de passe

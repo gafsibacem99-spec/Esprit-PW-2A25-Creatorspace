@@ -27,60 +27,60 @@ class UserModel {
         return $stmt->fetch();
     }
 
-    public function insert(array $data): int|false {
+    public function insert(array $data): int {
         $stmt = $this->pdo->prepare(
-            "INSERT INTO user (nom, prenom, mail, password, role)
-             VALUES (?, ?, ?, MD5(?), ?)"
+            "INSERT INTO `user` (nom, prenom, mail, `password`, role, type_compte)
+             VALUES (?, ?, ?, MD5(?), 'user', ?)"
         );
         $stmt->execute([
             trim($data['nom']),
             trim($data['prenom']),
             trim($data['mail']),
             trim($data['password']),
-            $data['role'] ?? 'user'
+            trim($data['type_compte'] ?? 'user')
         ]);
-        return $this->pdo->lastInsertId();
+        return (int)$this->pdo->lastInsertId();
     }
 
-    // update() — admin edit, ne touche pas au password
     public function update(int $id, array $data): void {
         $stmt = $this->pdo->prepare(
-            "UPDATE user SET nom=?, prenom=?, mail=?, role=? WHERE id=?"
+            "UPDATE `user` SET nom=?, prenom=?, mail=?, role=?, type_compte=? WHERE id=?"
         );
         $stmt->execute([
             trim($data['nom']),
             trim($data['prenom']),
             trim($data['mail']),
-            $data['role'] ?? 'user',
+            $data['role']        ?? 'user',
+            $data['type_compte'] ?? 'user',
             $id
         ]);
     }
 
-    // updateProfile() — password optionnel : si vide on ne le change pas
-    public function updateProfile(int $id, array $data): bool {
+    public function updateProfile(int $id, array $data): void {
         if (!empty(trim($data['password'] ?? ''))) {
             $stmt = $this->pdo->prepare(
-                "UPDATE user SET nom=?, prenom=?, mail=?, password=MD5(?) WHERE id=?"
+                "UPDATE `user` SET nom=?, prenom=?, mail=?, `password`=MD5(?), type_compte=? WHERE id=?"
             );
             $stmt->execute([
                 trim($data['nom']),
                 trim($data['prenom']),
                 trim($data['mail']),
                 trim($data['password']),
+                trim($data['type_compte'] ?? 'user'),
                 $id
             ]);
         } else {
             $stmt = $this->pdo->prepare(
-                "UPDATE user SET nom=?, prenom=?, mail=? WHERE id=?"
+                "UPDATE `user` SET nom=?, prenom=?, mail=?, type_compte=? WHERE id=?"
             );
             $stmt->execute([
                 trim($data['nom']),
                 trim($data['prenom']),
                 trim($data['mail']),
+                trim($data['type_compte'] ?? 'user'),
                 $id
             ]);
         }
-        return true;
     }
 
     // mailExiste() — vérifie unicité email, exclut l'id courant en édition
@@ -97,8 +97,6 @@ class UserModel {
         $stmt->execute([$id]);
     }
 
-    // ── Statistics methods ────────────────────────────────────
-
     public function countAll(): int {
         $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM `user`");
         $stmt->execute();
@@ -111,8 +109,13 @@ class UserModel {
         return (int)$stmt->fetchColumn();
     }
 
+    public function countByType(string $type): int {
+        $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM `user` WHERE `type_compte` = ?");
+        $stmt->execute([$type]);
+        return (int)$stmt->fetchColumn();
+    }
+
     public function countNewThisMonth(): int {
-        // Requires created_at column — run: ALTER TABLE `user` ADD COLUMN IF NOT EXISTS `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
         try {
             $stmt = $this->pdo->prepare(
                 "SELECT COUNT(*) FROM `user`
@@ -122,14 +125,14 @@ class UserModel {
             $stmt->execute();
             return (int)$stmt->fetchColumn();
         } catch (\PDOException $e) {
-            return 0; // fallback if created_at column doesn't exist yet
+            return 0;
         }
     }
 
     public function getLastFive(): array {
         $stmt = $this->pdo->prepare(
-            "SELECT id, nom, prenom, mail, role FROM `user`
-             ORDER BY id DESC LIMIT 5"
+            "SELECT id, nom, prenom, mail, role, type_compte
+             FROM `user` ORDER BY id DESC LIMIT 5"
         );
         $stmt->execute();
         return $stmt->fetchAll();
